@@ -72,6 +72,8 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [fundingStudyId, setFundingStudyId] = useState<string | null>(null);
   const [settlingStudyId, setSettlingStudyId] = useState<string | null>(null);
+  const [studyToFund, setStudyToFund] = useState<ResearchStudy | null>(null);
+  const [studyToSettle, setStudyToSettle] = useState<ResearchStudy | null>(null);
   const [completingEnrollmentId, setCompletingEnrollmentId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -762,8 +764,30 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
                   : 'Studies you have applied to or completed.'}
               </p>
               {myDashboardLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="text-slate-400">Loading…</div>
+                <div className="animate-pulse space-y-6">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 h-[88px]" />
+                    ))}
+                  </div>
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col sm:flex-row gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="h-5 bg-white/10 rounded w-3/4 max-w-xs" />
+                          <div className="h-4 bg-white/10 rounded w-full max-w-md" />
+                          <div className="flex gap-3 mt-3">
+                            <div className="h-6 bg-white/10 rounded w-16" />
+                            <div className="h-6 bg-white/10 rounded w-24" />
+                          </div>
+                        </div>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <div className="h-9 bg-white/10 rounded-lg w-24" />
+                          <div className="h-9 bg-white/10 rounded-lg w-16" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : mode === 'researcher' ? (
                 <>
@@ -808,9 +832,9 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
                           </div>
                           <div className="flex flex-wrap gap-2 flex-shrink-0">
                             {!study.yellowSessionId ? (
-                              <button type="button" disabled={!!fundingStudyId} onClick={() => handleFundStudy(study)} className="px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-sm font-semibold disabled:opacity-50">{(fundingStudyId === study.id ? 'Funding…' : 'Fund Study')}</button>
+                              <button type="button" disabled={!!fundingStudyId} onClick={() => setStudyToFund(study)} className="px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-sm font-semibold disabled:opacity-50">{(fundingStudyId === study.id ? 'Funding…' : 'Fund Study')}</button>
                             ) : (
-                              <button type="button" disabled={!!settlingStudyId} onClick={() => handleSettleStudy(study)} className="px-4 py-2 rounded-lg bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 text-sm font-semibold disabled:opacity-50">{(settlingStudyId === study.id ? 'Settling…' : 'Settle Payouts')}</button>
+                              <button type="button" disabled={!!settlingStudyId} onClick={() => setStudyToSettle(study)} className="px-4 py-2 rounded-lg bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 text-sm font-semibold disabled:opacity-50">{(settlingStudyId === study.id ? 'Settling…' : 'Settle Payouts')}</button>
                             )}
                             <button type="button" onClick={() => setStudyToEdit(study)} className="px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 text-sm font-semibold">Edit</button>
                             <button type="button" onClick={() => setStudyToDelete(study)} className="px-4 py-2 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 text-sm font-semibold">Delete</button>
@@ -1163,8 +1187,15 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
                 <button onClick={handleRequestCreateStudy} className="bg-slate-900 text-white px-8 py-3 rounded-2xl font-black hover:bg-slate-800 shadow-xl">+ Launch New Project</button>
               </div>
               {myDashboardLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="text-slate-400">Loading…</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="bg-white rounded-xl border border-slate-200 p-6 h-64 flex flex-col gap-3">
+                      <div className="h-4 bg-slate-100 rounded w-1/3" />
+                      <div className="h-4 bg-slate-100 rounded w-1/4" />
+                      <div className="h-3 bg-slate-100 rounded w-full flex-grow" />
+                      <div className="h-9 bg-slate-100 rounded-lg w-full mt-2" />
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1274,48 +1305,50 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
       )}
 
       {isCreating && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl relative z-10">
-            <div className="p-8 border-b bg-slate-50 flex justify-between items-center">
-              <h3 className="text-2xl font-black text-slate-900">Launch New Project</h3>
-              <button onClick={() => setIsCreating(false)} className="text-slate-400 text-2xl">×</button>
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[150] flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl relative z-10 flex flex-col my-8 max-h-[90vh]">
+            <div className="p-6 border-b bg-slate-50 flex justify-between items-center flex-shrink-0">
+              <h3 className="text-xl font-black text-slate-900">Launch New Project</h3>
+              <button onClick={() => setIsCreating(false)} className="text-slate-400 text-2xl leading-none">×</button>
             </div>
-            <form onSubmit={handleCreateStudy} className="p-8 space-y-4">
-              <div className="flex justify-between items-center">
-                <button type="button" onClick={handleAIAssist} disabled={isLoadingAI} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider">
-                  {isLoadingAI ? 'Generating...' : '✨ AI Assist Content'}
-                </button>
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-1">Project Title</label>
-                <input id="study-title" name="title" required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold mb-1">Compensation ($)</label>
-                  <input name="compensation" type="number" required min={0} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+            <form onSubmit={handleCreateStudy} className="flex flex-col min-h-0 flex-1 flex">
+              <div className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+                <div className="flex justify-between items-center">
+                  <button type="button" onClick={handleAIAssist} disabled={isLoadingAI} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider">
+                    {isLoadingAI ? 'Generating...' : '✨ AI Assist Content'}
+                  </button>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold mb-1">Max participants</label>
-                  <input name="max_participants" type="number" required min={1} defaultValue={100} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                  <label className="block text-sm font-bold mb-1">Project Title</label>
+                  <input id="study-title" name="title" required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold mb-1">Compensation ($)</label>
+                    <input name="compensation" type="number" required min={0} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold mb-1">Max participants</label>
+                    <input name="max_participants" type="number" required min={1} defaultValue={100} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">Category (for display)</label>
+                  <select name="category" required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none">
+                    {categories.filter(c => c !== 'All Categories').map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">Eligibility Criteria</label>
+                  <input id="study-elig" name="eligibility" required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">Description</label>
+                  <textarea id="study-desc" name="description" rows={4} required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none resize-none" />
+                </div>
+                <input name="location" type="hidden" value="Remote/Global" />
               </div>
-              <div>
-                <label className="block text-sm font-bold mb-1">Category (for display)</label>
-                <select name="category" required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none">
-                  {categories.filter(c => c !== 'All Categories').map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-1">Eligibility Criteria</label>
-                <input id="study-elig" name="eligibility" required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-1">Description</label>
-                <textarea id="study-desc" name="description" rows={4} required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none resize-none" />
-              </div>
-              <input name="location" type="hidden" value="Remote/Global" />
-              <div className="flex gap-4 pt-6">
+              <div className="p-6 border-t bg-white flex gap-4 flex-shrink-0">
                 <button type="button" onClick={() => setIsCreating(false)} className="flex-1 py-4 bg-slate-100 rounded-2xl font-bold">Cancel</button>
                 <button type="submit" disabled={isSubmittingStudy} className="flex-1 py-4 bg-slate-900 text-white font-black rounded-2xl cursor-pointer hover:bg-slate-800 active:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{(isSubmittingStudy ? 'Publishing…' : 'Publish Listing')}</button>
               </div>
@@ -1325,11 +1358,11 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
       )}
 
       {studyToEdit && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl relative z-10">
-            <div className="p-8 border-b bg-slate-50 flex justify-between items-center">
-              <h3 className="text-2xl font-black text-slate-900">Edit study</h3>
-              <button type="button" onClick={() => setStudyToEdit(null)} className="text-slate-400 text-2xl">×</button>
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[150] flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl relative z-10 flex flex-col my-8 max-h-[90vh]">
+            <div className="p-6 border-b bg-slate-50 flex justify-between items-center flex-shrink-0">
+              <h3 className="text-xl font-black text-slate-900">Edit study</h3>
+              <button type="button" onClick={() => setStudyToEdit(null)} className="text-slate-400 text-2xl leading-none">×</button>
             </div>
             <form
               key={studyToEdit.id}
@@ -1373,51 +1406,139 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
                   setIsUpdatingStudy(false);
                 }
               }}
-              className="p-8 space-y-4"
+              className="flex flex-col min-h-0 flex-1 flex"
             >
-              <div>
-                <label className="block text-sm font-bold mb-1">Project Title</label>
-                <input name="title" defaultValue={studyToEdit.title} required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
                 <div>
-                  <label className="block text-sm font-bold mb-1">Compensation ($)</label>
-                  <input name="compensation" type="number" defaultValue={studyToEdit.compensation} required min={0} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                  <label className="block text-sm font-bold mb-1">Project Title</label>
+                  <input name="title" defaultValue={studyToEdit.title} required className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold mb-1">Compensation ($)</label>
+                    <input name="compensation" type="number" defaultValue={studyToEdit.compensation} required min={0} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold mb-1">Max participants</label>
+                    <input name="max_participants" type="number" defaultValue={studyToEdit.maxParticipants ?? 100} required min={1} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold mb-1">Max participants</label>
-                  <input name="max_participants" type="number" defaultValue={studyToEdit.maxParticipants ?? 100} required min={1} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                  <label className="block text-sm font-bold mb-1">Status</label>
+                  <select name="status" defaultValue={studyToEdit.status === 'CLOSED' ? 'closed' : 'open'} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none">
+                    <option value="open">Open</option>
+                    <option value="closed">Closed</option>
+                  </select>
                 </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">Category (for display)</label>
+                  <select name="category" required defaultValue={studyToEdit.category} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none">
+                    {categories.filter(c => c !== 'All Categories').map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">Eligibility Criteria</label>
+                  <input name="eligibility" defaultValue={studyToEdit.eligibility} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">Description</label>
+                  <textarea name="description" rows={4} defaultValue={studyToEdit.description} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none resize-none" />
+                </div>
+                <input name="location" type="hidden" value="Remote/Global" />
               </div>
-              <div>
-                <label className="block text-sm font-bold mb-1">Status</label>
-                <select name="status" defaultValue={studyToEdit.status === 'CLOSED' ? 'closed' : 'open'} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none">
-                  <option value="open">Open</option>
-                  <option value="closed">Closed</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-1">Category (for display)</label>
-                <select name="category" required defaultValue={studyToEdit.category} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none">
-                  {categories.filter(c => c !== 'All Categories').map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-1">Eligibility Criteria</label>
-                <input name="eligibility" defaultValue={studyToEdit.eligibility} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-1">Description</label>
-                <textarea name="description" rows={4} defaultValue={studyToEdit.description} className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none resize-none" />
-              </div>
-              <input name="location" type="hidden" value="Remote/Global" />
-              <div className="flex gap-4 pt-6">
+              <div className="p-6 border-t bg-white flex gap-4 flex-shrink-0">
                 <button type="button" onClick={() => setStudyToEdit(null)} className="flex-1 py-4 bg-slate-100 rounded-2xl font-bold">Cancel</button>
                 <button type="submit" disabled={isUpdatingStudy} className="flex-1 py-4 bg-slate-900 text-white font-black rounded-2xl disabled:opacity-50">{(isUpdatingStudy ? 'Saving…' : 'Save changes')}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {studyToFund && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative z-10 p-8">
+            <h3 className="text-xl font-black text-slate-900 mb-2">Fund study</h3>
+            <p className="text-slate-600 text-sm mb-4">
+              You are about to fund <strong>&quot;{studyToFund.title}&quot;</strong> via Yellow Network.
+            </p>
+            <div className="bg-slate-50 rounded-xl p-4 mb-6 text-sm">
+              <div className="flex justify-between text-slate-600 mb-1">
+                <span>Compensation per participant</span>
+                <span className="font-bold text-slate-900">${studyToFund.compensation}</span>
+              </div>
+              <div className="flex justify-between text-slate-600 mb-1">
+                <span>Max participants</span>
+                <span className="font-bold text-slate-900">{studyToFund.maxParticipants ?? 100}</span>
+              </div>
+              <div className="flex justify-between text-slate-700 mt-2 pt-2 border-t border-slate-200">
+                <span className="font-bold">Total budget</span>
+                <span className="font-black text-emerald-600">${studyToFund.compensation * (studyToFund.maxParticipants ?? 100)}</span>
+              </div>
+            </div>
+            <p className="text-slate-500 text-xs mb-6">
+              This creates a Yellow funding session and records the funded amount. Participants can be paid out after you complete the study and settle.
+            </p>
+            <div className="flex gap-4">
+              <button type="button" onClick={() => setStudyToFund(null)} className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const study = studyToFund;
+                  setStudyToFund(null);
+                  if (study) await handleFundStudy(study);
+                }}
+                disabled={!!fundingStudyId}
+                className="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-50"
+              >
+                Fund study
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {studyToSettle && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative z-10 p-8">
+            <h3 className="text-xl font-black text-slate-900 mb-2">Settle payouts</h3>
+            <p className="text-slate-600 text-sm mb-4">
+              Finalize payments for <strong>&quot;{studyToSettle.title}&quot;</strong>.
+            </p>
+            <div className="bg-slate-50 rounded-xl p-4 mb-6 text-sm">
+              <div className="flex justify-between text-slate-600 mb-1">
+                <span>Participants to pay</span>
+                <span className="font-bold text-slate-900">{studyToSettle.participantCount}</span>
+              </div>
+              <div className="flex justify-between text-slate-600 mb-1">
+                <span>Amount per participant</span>
+                <span className="font-bold text-slate-900">${studyToSettle.compensation}</span>
+              </div>
+              <div className="flex justify-between text-slate-700 mt-2 pt-2 border-t border-slate-200">
+                <span className="font-bold">Total payout</span>
+                <span className="font-black text-violet-600">${studyToSettle.participantCount * studyToSettle.compensation}</span>
+              </div>
+            </div>
+            <p className="text-slate-500 text-xs mb-6">
+              This settles the Yellow session and records the payout transaction. Make sure you have marked participants as completed before settling.
+            </p>
+            <div className="flex gap-4">
+              <button type="button" onClick={() => setStudyToSettle(null)} className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const study = studyToSettle;
+                  setStudyToSettle(null);
+                  if (study) await handleSettleStudy(study);
+                }}
+                disabled={!!settlingStudyId}
+                className="flex-1 py-3 bg-violet-600 text-white font-bold rounded-xl hover:bg-violet-700 disabled:opacity-50"
+              >
+                Settle payouts
+              </button>
+            </div>
           </div>
         </div>
       )}

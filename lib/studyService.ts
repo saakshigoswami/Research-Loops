@@ -293,6 +293,7 @@ export async function getOrCreateResearcher(
 
 /**
  * Fetch studies created by the given researcher wallet (for "My Dashboard").
+ * Optimized: only queries this researcher's studies and their enrollment counts (no full fetchStudies / no IPFS).
  */
 export async function fetchResearcherStudies(
   researcherWallet: string
@@ -306,7 +307,44 @@ export async function fetchResearcherStudies(
     .eq('wallet_address', wallet)
     .single();
   if (rErr || !researcher) return [];
-  const all = await fetchStudies();
-  return all.filter((s) => s.researcherId === researcher.id);
+
+  const { data: studiesRows, error: studiesError } = await supabase
+    .from('studies')
+    .select('id, title, ipfs_cid, reward_amount, max_participants, status, created_at, researcher_id, yellow_session_id, funded_amount')
+    .eq('researcher_id', researcher.id)
+    .order('created_at', { ascending: false });
+
+  if (studiesError || !studiesRows?.length) return [];
+
+  const studyIds = studiesRows.map((s) => s.id);
+  const { data: enrollmentCounts } = await supabase
+    .from('enrollments')
+    .select('study_id')
+    .in('study_id', studyIds);
+
+  const countByStudy = new Map<string, number>();
+  for (const e of enrollmentCounts ?? []) {
+    countByStudy.set(e.study_id, (countByStudy.get(e.study_id) ?? 0) + 1);
+  }
+
+  const researcherName = shortWallet(wallet);
+  return studiesRows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    description: '',
+    category: 'Surveys' as const,
+    eligibility: '',
+    location: 'Remote',
+    compensation: Number(row.reward_amount),
+    researcherId: researcher.id,
+    researcherName,
+    createdAt: row.created_at,
+    participantCount: countByStudy.get(row.id) ?? 0,
+    status: mapStatus(row.status as StudyStatus),
+    ipfsCid: row.ipfs_cid ?? undefined,
+    maxParticipants: row.max_participants ?? undefined,
+    yellowSessionId: row.yellow_session_id ?? undefined,
+    fundedAmount: row.funded_amount != null ? Number(row.funded_amount) : undefined,
+  }));
 }
 
