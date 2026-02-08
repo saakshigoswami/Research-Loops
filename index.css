@@ -87,6 +87,20 @@ body {
   }
 }
 
+@keyframes yellowNetworkPulse {
+  0%, 100% {
+    opacity: 0.95;
+    text-shadow: 0 0 12px rgba(251, 191, 36, 0.35);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+  }
+}
+.yellow-network-text {
+  animation: yellowNetworkPulse 2.5s ease-in-out infinite;
+}
+
 /* Animation utility classes */
 .animate-fade-in-up {
   animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -139,6 +153,64 @@ body {
 .feature-delay-1 { animation-delay: 0.2s; opacity: 0; }
 .feature-delay-2 { animation-delay: 0.35s; opacity: 0; }
 .feature-delay-3 { animation-delay: 0.5s; opacity: 0; }
+
+/* Landing: stat cards stagger in */
+@keyframes statCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.landing-stat-card {
+  animation: statCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+}
+.landing-stat-delay-1 { animation-delay: 0.1s; }
+.landing-stat-delay-2 { animation-delay: 0.2s; }
+.landing-stat-delay-3 { animation-delay: 0.3s; }
+
+/* Landing: "Choose Your Vertical" title and line */
+@keyframes verticalTitleIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes lineExpand {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+.landing-vertical-title {
+  animation: verticalTitleIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+  opacity: 0;
+}
+.landing-vertical-line {
+  transform-origin: center;
+  animation: lineExpand 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+  opacity: 0;
+}
+
+/* Landing: feature cards subtle hover lift */
+.landing-feature-card {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.landing-feature-card:hover {
+  transform: translateY(-4px);
+}
 
 /* Trending screen (ResearchFi-style dark dashboard) */
 .trending-screen {
