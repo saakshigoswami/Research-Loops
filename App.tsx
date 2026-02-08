@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useEnsName } from 'wagmi';
+import { mainnet } from 'wagmi/chains';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { UserRole, ResearchStudy, Collaboration, DataAsset } from './types';
 import { StudyCard } from './components/StudyCard';
@@ -25,6 +27,11 @@ function shortAddress(addr: string): string {
 
 const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) => {
   const navigate = useNavigate();
+  // Resolve ENS on mainnet for researcher identity (ENS track)
+  const { data: ensName } = useEnsName({
+    address: address ? (address as `0x${string}`) : undefined,
+    chainId: mainnet.id,
+  });
   const [studies, setStudies] = useState<ResearchStudy[]>([]);
   const [collaborations, setCollaborations] = useState<Collaboration[]>([]);
   const [dataAssets, setDataAssets] = useState<DataAsset[]>([]);
@@ -469,15 +476,15 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
     });
   }, []);
 
-  // Upsert researcher or participant on mount
+  // Upsert researcher (with ENS when resolved) or participant on mount
   useEffect(() => {
     if (!address) return;
     if (mode === 'researcher') {
-      getOrCreateResearcher(address).then(setResearcherId);
+      getOrCreateResearcher(address, ensName ?? null).then(setResearcherId);
     } else {
       ensureParticipant(address);
     }
-  }, [address, mode]);
+  }, [address, mode, ensName]);
 
   // Sync participant tab with route
   useEffect(() => {
@@ -544,6 +551,7 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
           rewardAmount: compensation,
           maxParticipants,
           researcherWallet: address,
+          researcherEns: ensName ?? undefined,
           ipfsCid,
         });
         if (result) {

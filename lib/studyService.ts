@@ -270,17 +270,22 @@ export async function setStudyFunding(
 }
 
 /**
- * Upsert researcher by wallet; returns researcher id or null.
+ * Upsert researcher by wallet; optionally set ENS name (for ENS identity).
+ * Returns researcher id or null.
  */
 export async function getOrCreateResearcher(
-  researcherWallet: string
+  researcherWallet: string,
+  ensName?: string | null
 ): Promise<string | null> {
   if (!isSupabaseConfigured() || !supabase) return null;
   const wallet = researcherWallet.trim();
   if (!wallet) return null;
   const { data: researcher, error } = await supabase
     .from('researchers')
-    .upsert({ wallet_address: wallet, ens_name: null }, { onConflict: 'wallet_address' })
+    .upsert(
+      { wallet_address: wallet, ens_name: ensName ?? null },
+      { onConflict: 'wallet_address' }
+    )
     .select('id')
     .single();
   return error || !researcher ? null : researcher.id;

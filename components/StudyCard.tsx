@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { ResearchStudy } from '../types';
+import { EnsProfile } from './EnsProfile';
 
 interface StudyCardProps {
   study: ResearchStudy;
@@ -22,7 +22,7 @@ export const StudyCard: React.FC<StudyCardProps> = ({ study, onApply, showApplyB
       
       <div className="mb-4">
         <h3 className="text-xl font-semibold text-slate-900 line-clamp-1">{study.title}</h3>
-        <p className="text-sm text-slate-500 font-medium">By {study.researcherName}</p>
+        <EnsProfile name={study.researcherName} showDescription className="text-slate-500" />
       </div>
       
       <p className="text-slate-600 text-sm mb-4 line-clamp-3 flex-grow">{study.description}</p>
