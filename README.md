@@ -25,6 +25,6 @@ This repo integrates **Yellow Network** in **demo/mock mode** only:
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. (Optional) Set `VITE_GEMINI_API_KEY` in [.env.local](.env.local) for AI Assist when creating studies. Without it the app runs; only AI Assist will prompt for the key.
 3. Run the app:
    `npm run dev`
