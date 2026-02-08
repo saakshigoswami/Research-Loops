@@ -46,7 +46,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white w-10 h-10 flex items-center justify-center rounded-xl font-black text-xl shadow-lg shadow-indigo-500/25 group-hover:shadow-indigo-500/40 group-hover:scale-105 transition-all duration-300">R</div>
-            <span className="text-xl font-black text-slate-900 tracking-tighter uppercase group-hover:text-indigo-600 transition-colors duration-300">ReSearch</span>
+            <span className="text-xl font-black text-slate-900 tracking-tighter group-hover:text-indigo-600 transition-colors duration-300">ResearchOS</span>
           </Link>
           <div className="flex items-center gap-2 flex-wrap">
             <button type="button" onClick={handleJoinAsSubject} className="nav-tab hidden md:flex items-center text-sm font-bold text-slate-700 bg-indigo-50/90 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg px-4 py-2.5 transition-all duration-200 border border-indigo-100/80">Find a Study</button>
@@ -79,10 +79,10 @@ export function LandingPage() {
         <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center pt-20 pb-16 px-6">
           <div className="lg:col-span-7">
             <h1 className="landing-hero-title animate-fade-in-up animate-fade-in-up-2 text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-8xl text-white mb-6 leading-[1.02] tracking-tight">
-              Build the future of <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-violet-300 to-amber-300 bg-[length:200%_auto] animate-gradient-bg">research</span>.
+              ResearchOS
             </h1>
             <p className="animate-fade-in-up animate-fade-in-up-3 text-xl md:text-2xl text-slate-300 mb-8 leading-relaxed max-w-xl font-medium">
-              Connect visionaries with voices. Run studies, join trials, or share data—all in one place.
+              The Incentive Operating System for Human Research. Research & earn.
             </p>
             <div className="flex flex-wrap gap-4 animate-fade-in-up animate-fade-in-up-4">
               <button type="button" onClick={handleLaunchResearchLab} className="relative overflow-hidden px-10 py-4 bg-white text-slate-900 rounded-2xl font-black text-lg shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 hover:bg-indigo-50 border border-white/20">
@@ -215,7 +215,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="flex items-center gap-2">
             <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white w-8 h-8 flex items-center justify-center rounded-lg font-black shadow shadow-indigo-500/20">R</div>
-            <span className="font-black text-slate-900 uppercase tracking-tighter">ReSearch Connect</span>
+            <span className="font-black text-slate-900 tracking-tighter">ResearchOS</span>
           </div>
           <div className="flex gap-10 text-[11px] font-black text-slate-400 uppercase tracking-widest">
             <a href="#" className="hover:text-indigo-600 transition-colors">Privacy</a>

@@ -733,7 +733,7 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <div className="bg-slate-900 text-white p-1.5 rounded-lg font-bold">R</div>
-              <span className="text-xl font-bold text-slate-900 tracking-tight">ReSearch</span>
+              <span className="text-xl font-bold text-slate-900 tracking-tight">ResearchOS</span>
             </Link>
             <div className="flex gap-4">
               {mode === 'researcher' ? (
