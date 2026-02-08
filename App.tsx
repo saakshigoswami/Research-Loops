@@ -8,7 +8,7 @@ import { StudyCard } from './components/StudyCard';
 import { generateStudyContent } from './services/geminiService';
 import { isSupabaseConfigured } from './lib/supabase';
 import { fetchStudies, createStudy, fetchResearcherStudies, updateStudy, deleteStudy, getOrCreateResearcher, setStudyFunding } from './lib/studyService';
-import { joinStudy, fetchParticipantEnrollments, ensureParticipant, markEnrollmentCompleted, markEnrollmentsPaidForStudy, type EnrollmentWithStudy } from './lib/participantService';
+import { joinStudy, fetchParticipantEnrollments, ensureParticipant, markEnrollmentCompleted, markEnrollmentsPaidForStudy, fetchEnrollmentsForStudy, type EnrollmentWithStudy, type StudyEnrollmentRow } from './lib/participantService';
 import { createStudyFundingSession, settleStudySession, creditParticipantInSession } from './lib/yellow';
 import { getProfile, setProfile, hasMinimalProfile } from './lib/profileService';
 import { isIpfsConfigured, uploadStudyMetadata } from './lib/ipfs';
@@ -74,6 +74,7 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
   const [settlingStudyId, setSettlingStudyId] = useState<string | null>(null);
   const [studyToFund, setStudyToFund] = useState<ResearchStudy | null>(null);
   const [studyToSettle, setStudyToSettle] = useState<ResearchStudy | null>(null);
+  const [settleEnrollments, setSettleEnrollments] = useState<StudyEnrollmentRow[]>([]);
   const [completingEnrollmentId, setCompletingEnrollmentId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -506,6 +507,14 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
       fetchParticipantEnrollments(address).then(setMyDashboardEnrollments).finally(() => setMyDashboardLoading(false));
     }
   }, [activeTab, address, mode]);
+
+  useEffect(() => {
+    if (!studyToSettle) {
+      setSettleEnrollments([]);
+      return;
+    }
+    fetchEnrollmentsForStudy(studyToSettle.id, studyToSettle.compensation).then(setSettleEnrollments);
+  }, [studyToSettle]);
 
   const filteredStudies = useMemo(() => {
     return studies.filter(study => {
@@ -1461,8 +1470,11 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative z-10 p-8">
             <h3 className="text-xl font-black text-slate-900 mb-2">Fund study</h3>
+            <div className="inline-block bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg mb-4">
+              Funding by using Ethereum
+            </div>
             <p className="text-slate-600 text-sm mb-4">
-              You are about to fund <strong>&quot;{studyToFund.title}&quot;</strong> via Yellow Network.
+              You are about to fund <strong>&quot;{studyToFund.title}&quot;</strong>. The budget will be locked for this study.
             </p>
             <div className="bg-slate-50 rounded-xl p-4 mb-6 text-sm">
               <div className="flex justify-between text-slate-600 mb-1">
@@ -1479,7 +1491,7 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
               </div>
             </div>
             <p className="text-slate-500 text-xs mb-6">
-              This creates a Yellow funding session and records the funded amount. Participants can be paid out after you complete the study and settle.
+              This creates a funding session and records the amount. Participants can be paid out after you complete the study and settle via Yellow.
             </p>
             <div className="flex gap-4">
               <button type="button" onClick={() => setStudyToFund(null)} className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
@@ -1501,30 +1513,42 @@ const App: React.FC<AppProps> = ({ mode, address, participantTab = 'studies' }) 
       )}
 
       {studyToSettle && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative z-10 p-8">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative z-10 p-8 my-8 max-h-[90vh] flex flex-col">
             <h3 className="text-xl font-black text-slate-900 mb-2">Settle payouts</h3>
-            <p className="text-slate-600 text-sm mb-4">
+            <p className="text-slate-600 text-sm mb-3">
               Finalize payments for <strong>&quot;{studyToSettle.title}&quot;</strong>.
             </p>
-            <div className="bg-slate-50 rounded-xl p-4 mb-6 text-sm">
-              <div className="flex justify-between text-slate-600 mb-1">
-                <span>Participants to pay</span>
-                <span className="font-bold text-slate-900">{studyToSettle.participantCount}</span>
-              </div>
-              <div className="flex justify-between text-slate-600 mb-1">
-                <span>Amount per participant</span>
-                <span className="font-bold text-slate-900">${studyToSettle.compensation}</span>
-              </div>
-              <div className="flex justify-between text-slate-700 mt-2 pt-2 border-t border-slate-200">
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Participants & earnings</div>
+            <div className="bg-slate-50 rounded-xl border border-slate-100 overflow-hidden mb-4 flex-1 min-h-0 overflow-y-auto max-h-48">
+              {settleEnrollments.length === 0 ? (
+                <div className="p-4 text-slate-500 text-sm text-center">Loading participants…</div>
+              ) : (
+                <ul className="divide-y divide-slate-200">
+                  {settleEnrollments.map((e) => (
+                    <li key={e.enrollmentId} className="flex justify-between items-center px-4 py-3 text-sm">
+                      <span className="font-mono text-slate-700 truncate max-w-[180px]" title={e.participantWallet}>
+                        {shortAddress(e.participantWallet)}
+                      </span>
+                      <span className="font-bold text-violet-600 shrink-0">${e.amount}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="bg-slate-50 rounded-xl p-4 mb-4 text-sm flex-shrink-0">
+              <div className="flex justify-between text-slate-700">
                 <span className="font-bold">Total payout</span>
                 <span className="font-black text-violet-600">${studyToSettle.participantCount * studyToSettle.compensation}</span>
               </div>
             </div>
-            <p className="text-slate-500 text-xs mb-6">
-              This settles the Yellow session and records the payout transaction. Make sure you have marked participants as completed before settling.
+            <div className="inline-block bg-amber-50 text-amber-800 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg mb-4">
+              Settling payment by using Yellow
+            </div>
+            <p className="text-slate-500 text-xs mb-4">
+              This settles the Yellow session and records the payout transaction. Only completed participants are paid.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-shrink-0">
               <button type="button" onClick={() => setStudyToSettle(null)} className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
               <button
                 type="button"

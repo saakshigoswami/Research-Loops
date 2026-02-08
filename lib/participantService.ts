@@ -117,6 +117,41 @@ export async function markEnrollmentCompleted(
   return !error;
 }
 
+export interface StudyEnrollmentRow {
+  enrollmentId: string;
+  participantWallet: string;
+  amount: number;
+  status: 'joined' | 'completed' | 'paid';
+}
+
+/**
+ * Fetch enrollments for a study (for researcher settle modal: list participants and earnings).
+ */
+export async function fetchEnrollmentsForStudy(
+  studyId: string,
+  compensationPerParticipant: number
+): Promise<StudyEnrollmentRow[]> {
+  if (!isSupabaseConfigured() || !supabase) return [];
+  const { data: rows, error } = await supabase
+    .from('enrollments')
+    .select('id, participant_id, status')
+    .eq('study_id', studyId)
+    .order('joined_at', { ascending: true });
+  if (error || !rows?.length) return [];
+  const participantIds = [...new Set(rows.map((r) => r.participant_id))];
+  const { data: participants } = await supabase
+    .from('participants')
+    .select('id, wallet_address')
+    .in('id', participantIds);
+  const walletMap = new Map((participants ?? []).map((p) => [p.id, p.wallet_address]));
+  return rows.map((e) => ({
+    enrollmentId: e.id,
+    participantWallet: walletMap.get(e.participant_id) ?? 'Unknown',
+    amount: compensationPerParticipant,
+    status: e.status as 'joined' | 'completed' | 'paid',
+  }));
+}
+
 /**
  * After Yellow settlement: mark all completed enrollments for a study as paid and store tx hash.
  */
