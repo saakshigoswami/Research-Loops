@@ -1,0 +1,7 @@
+{
+  "name": "ResSearch Connect",
+  "description": "A premium marketplace connecting researchers with qualified participants. Streamline your study recruitment with intelligent eligibility matching and secure project management.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
